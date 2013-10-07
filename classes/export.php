@@ -9,7 +9,7 @@ class CMailExport {
     private
         $errors,
         $events_data,
-        $export_filename,
+        $_export_filename,
         $_additional_message_fields;
 
     public function __construct() {
@@ -21,6 +21,7 @@ class CMailExport {
         );
     }
 
+
     public function execute($event_types) {
         $t = sizeof($event_types);
         if (0 < $t) {
@@ -30,10 +31,9 @@ class CMailExport {
                 if ('' != $et_name)
                     $this->_getEventTypeData($et_name);
             }
-            echo'<pre>',print_r($this->events_data),'</pre>';
-            die();
-
             $this->_export();
+            die('(((');
+
         } else {
             $this->_addError('Не указаны коды почтовых событий.');
         }
@@ -108,19 +108,41 @@ class CMailExport {
     }
 
 
-    protected function _export() {
-        $t = sizeof($this->events_data);
-        if (0 < $t) {
-            /*echo'<pre>Export:',print_r($this->events_data),'</pre>';
-
-
-
-
-            $i = 0;
-            for (; $i < $t; $i++) {
-
-
-            }*/
+    protected function _export() {  // TODO
+        if (0 < sizeof($this->events_data)) {
+            $xml = new SimpleXMLElement('<events></events>');
+            if ($xml !== false) {
+                foreach ($this->events_data as $code => $data) {
+                    $event = $xml->addChild(CMailTags::EVENT);
+                    $event->addChild(CMailTags::EVENT_CODE, $code);
+                    foreach ($data['events'] as $lid_event) {
+                        $lid_event = $event->addChild(CMailTags::EVENT_ITEM);
+                        $lid_event->addAttribute(CMailTags::SORT, $lid_event['sort']);
+                        $lid_event->addAttribute(CMailTags::EVENT_LID, $lid_event['lid']);
+                        $lid_event->addChild(CMailTags::EVENT_NAME, $lid_event['name']);
+                        $lid_event->addChild(CMailTags::EVENT_DESCR, $lid_event['description']);
+                    }
+                    if (!empty($data['messages'])) {
+                        foreach ($data['messages'] as $message) {
+                            $message = $event->addChild(CMailTags::MESSAGE);
+                            $message->addAttribute(CMailTags::ACTIVE, $message['ACTIVE']);
+                            $message->addAttribute(CMailTags::LID, $message['LID']);
+                            $message->addAttribute(CMailTags::SITE_ID, $message['SITE_ID']);
+                            $message->addChild(CMailTags::EMAIL_FROM, $message['EMAIL_FROM']);
+                            $message->addChild(CMailTags::EMAIL_TO, $message['EMAIL_TO']);
+                            $message->addChild(CMailTags::SUBJECT, $message['SUBJECT']);
+                            $message->addChild(CMailTags::MESSAGE_TEXT, $message['MESSAGE']);
+                            $message->addChild(CMailTags::BODY_TYPE, $message['BODY_TYPE']);
+                            foreach ($this->_additional_message_fields as $field)
+                                if (array_key_exists($field, $message))
+                                    $message->addChild($field, $message[$field]);
+                        }
+                    }
+                }
+                $xml->asXML('t.xml');
+            } else {
+                $this->_addError('Ошибка создания файла XML');
+            }
         } else {
             $this->_addError('Нет данных для импорта.');
         }
