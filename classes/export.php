@@ -110,7 +110,7 @@ class CMailExport {
 
     protected function _export() {  // TODO
         if (0 < sizeof($this->events_data)) {
-            $xml = new SimpleXMLElement('<events></events>');
+            $xml = new SimpleXMLElement('<' . '?xml version="1.0" encoding="UTF-8"?' . '><events></events>');
             if ($xml !== false) {
                 foreach ($this->events_data as $code => $data) {
                     $event = $xml->addChild(CMailTags::EVENT);

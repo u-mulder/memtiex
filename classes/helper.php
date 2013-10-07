@@ -43,4 +43,15 @@ class CMailHelper {
             mb_substr($str, 0, self::ALLOWED_DESCRIPTION_LENGTH);
     }
 
+
+/*public static function convertCharset($str, $charset_from, $charset_to) {
+$result = $str;
+
+if ($charset_from != $charset_to) {
+global $APPLICATION;
+$result = $APPLICATION->ConvertCharset($str, $charset_from, $charset_to);
+}
+return $result;
+}*/
+
 }
