@@ -32,10 +32,10 @@ if (CModule::IncludeModule('subscribe')) {
         if (0 < sizeof($ev_types)) {?>
 <form action="" method="POST" />
     <h3>Экспорт почтовых событий и шаблонов в файл</h3>
-    <label>
+    <? /*label>
         Заменять LID сайта в новых шаблонах на
         <input type="text" name="new_lid" value="" maxlength="5" title="Оставьте пустым если не хотите менять LID" />
-    </label>
+    </label*/ ?>
 
     <table class="">
         <tr>
