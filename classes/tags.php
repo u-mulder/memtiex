@@ -23,6 +23,7 @@ class CMailTags {
         EMAIL_TO = 'email_to',
         SUBJECT = 'subject',
         MESSAGE_TEXT = 'text',
-        BODY_TYPE  = 'text_type';
+        BODY_TYPE = 'text_type',
+        EXPORT_FILENAME = 'memtiex.xml';
 
 }

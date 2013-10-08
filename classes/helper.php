@@ -44,14 +44,15 @@ class CMailHelper {
     }
 
 
-/*public static function convertCharset($str, $charset_from, $charset_to) {
-$result = $str;
+    public static function convertCharset($str, $charset_from, $charset_to) {
+        $result = $str;
 
-if ($charset_from != $charset_to) {
-global $APPLICATION;
-$result = $APPLICATION->ConvertCharset($str, $charset_from, $charset_to);
-}
-return $result;
-}*/
+        if ($charset_from != $charset_to) {
+            global $APPLICATION;
+            $result = $APPLICATION->ConvertCharset($str, $charset_from, $charset_to);
+        }
+
+        return $result;
+    }
 
 }

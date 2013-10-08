@@ -1,5 +1,8 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php');
+
+//var_dump(SITE_CHARSET); defined!
+
 /*global $USER;
 if (!$USER->IsAdmin())
     LocalRedirect('/');*/
@@ -21,14 +24,19 @@ if (CModule::IncludeModule('subscribe')) {
         $obj_export = new CMailExport();
         $obj_export->execute($_POST['exp_et']);
         $errors = $obj_export->getErrors();
+        $filename = $obj_export->getExportFilename();
+        require_once('tpls/export_result.php');
     } elseif (isset($_POST['import'])) {
-        //$obj_import = new CMailImport;
-
+        $obj_import = new CMailImport;
+        $obj_import->execute($_FILES['iev']);
+        $errors = $obj_import->getErrors();
+        //$filename = $obj_import->getExportFilename();
+        require_once('tpls/import_result.php');
     } else {
         $ev_types = CMailHelper::getEventTypes();
         if (!defined('LANGUAGE_ID'))
             define('LANGUAGE_ID', 'ru');
-        //include 'tpls/import.form.php';
+        include 'tpls/import.form.php';
         if (0 < sizeof($ev_types)) {?>
 <form action="" method="POST" />
     <h3>Экспорт почтовых событий и шаблонов в файл</h3>
