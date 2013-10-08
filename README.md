@@ -1,4 +1,4 @@
 memtiex
 =======
 
-1C-bitrix mail events amd mail templates import/export script
+1C-bitrix mail events and mail templates import/export script
