@@ -20,73 +20,82 @@ class CMailImport {
             'FIELD1_NAME', 'FIELD1_VALUE', 'FIELD2_NAME', 'FIELD2_VALUE'
         );
         $this->_import_filename = CMailTags::EXPORT_FILENAME;
+        $this->_import_filename_parsed = CMailTags::EXPORT_FILENAME . 'txt';
     }
 
 
     public function execute($file_data) {
-        /*if (!empty($file_data))*/ {
-            $xml = new SimpleXMLElement($this->_import_filename, 0, true);
-            if ($xml) {
-                foreach ($xml as $event) {
-                    $message_add_allowed = true;
-                    $event_name = strval($event->{CMailTags::EVENT_CODE});
-                    foreach ($event->{CMailTags::EVENT_ITEM} as $event_item) {
-                        $attributes = $event_item->attributes();
-                        $lid = strval($attributes->{CMailTags::EVENT_LID});
-                        if ('' == $lid)
-                            $lid = 'ru';
-                        $sort = strval($attributes->{CMailTags::SORT});
-                        if ('' == $sort)
-                            $sort = '150';
-                        $res = $this->_addEventType(array(
+        if ($file_data['error'] == UPLOAD_ERROR_OK
+            && 0 < $file_data['size']
+            && 'text/xml' == $file_data['type']) {
+            $path = realpath(dirname(__FILE__) . '/../') . '/';
+            if (move_uploaded_file($file_data['tmp_name'],
+                $path . $this->_import_filename)) {
+                $this->_parse();
+            } else {
+                $this->_addError('Ошибка перемещения файла.');
+            }
+        } else {
+            $this->_addError('Ошибка загрузки файла.');
+        }
+    }
+
+
+    protected function _parse() {
+        $xml = new SimpleXMLElement($this->_import_filename, 0, true);
+        if ($xml) {
+            foreach ($xml as $event) {
+                $message_add_allowed = true;
+                $event_name = strval($event->{CMailTags::EVENT_CODE});
+                foreach ($event->{CMailTags::EVENT_ITEM} as $event_item) {
+                    $attributes = $event_item->attributes();
+                    $lid = strval($attributes->{CMailTags::EVENT_LID});
+                    if ('' == $lid)
+                        $lid = 'ru';
+                    $sort = strval($attributes->{CMailTags::SORT});
+                    if ('' == $sort)
+                        $sort = '150';
+                    $res = $this->_addEventType(array(
+                        'EVENT_NAME' => $event_name,
+                        'LID' => $lid,
+                        'NAME' => strval($event_item->{CMailTags::EVENT_NAME}),
+                        'DESCRIPTION' => strval($event_item->{CMailTags::EVENT_DESCR}),
+                        'SORT' => $sort,
+                    ));
+                    if (!$res)
+                        $message_add_allowed = false;
+                }
+
+                if ($message_add_allowed) {
+                    foreach ($event->{CMailTags::MESSAGE} as $msg) {
+                        $attributes = $msg->attributes();
+                        $active = strval($attributes->{CMailTags::ACTIVE});
+                        /*$ = strval($msg->{CMailTag::});
+                        $ = strval($msg->{CMailTag::});*/   // TODO!
+                        $msg_array = array(
+                            'ACTIVE' => $active,
+                            //'LID' => $lid,    // TODO
                             'EVENT_NAME' => $event_name,
-                            'LID' => $lid,
-                            'NAME' => strval($event_item->{CMailTags::EVENT_NAME}),
-                            'DESCRIPTION' => strval($event_item->{CMailTags::EVENT_DESCR}),
-                            'SORT' => $sort,
-                        ));
-                        if (!$res)
-                            $message_add_allowed = false;
-                    }
-
-                    var_dump($message_add_allowed);
-                    $message_add_allowed = true;
-
-                    if ($message_add_allowed) {
-                        foreach ($event->{CMailTags::MESSAGE} as $msg) {
-                            $attributes = $msg->attributes();
-                            $active = strval($attributes->{CMailTags::ACTIVE});
-                            /*$ = strval($msg->{CMailTag::});
-                            $ = strval($msg->{CMailTag::});*/
-                            $msg_array = array(
-                                'ACTIVE' => $active,
-                                //'LID' => $lid,    // TODO
-                                'EVENT_NAME' => $event_name,
-                                'EMAIL_FROM' => strval($msg->{CMailTags::EMAIL_FROM}),
-                                'EMAIL_TO ' => strval($msg->{CMailTags::EMAIL_TO}),
-                                'SUBJECT' => strval($msg->{CMailTags::SUBJECT}),
-                                'MESSAGE' => strval($msg->{CMailTags::MESSAGE_TEXT}),
-                                'BODY_TYPE' => strval($msg->{CMailTags::BODY_TYPE}),
-                            );
-                            foreach ($this->_additional_message_fields as $field) {
-                                //if ()
-
-
-                            }
-                            $this->_addEventMessage($msg_array);
+                            'EMAIL_FROM' => strval($msg->{CMailTags::EMAIL_FROM}),
+                            'EMAIL_TO ' => strval($msg->{CMailTags::EMAIL_TO}),
+                            'SUBJECT' => strval($msg->{CMailTags::SUBJECT}),
+                            'MESSAGE' => strval($msg->{CMailTags::MESSAGE_TEXT}),
+                            'BODY_TYPE' => strval($msg->{CMailTags::BODY_TYPE}),
+                        );
+                        foreach ($this->_additional_message_fields as $field) {
+                            $field_val = strval($msg->{strtolower($field)});
+                            if ('' != $field_val)
+                                $msg_array[$field] = $field_val;
                         }
+                        $this->_addEventMessage($msg_array);
                     }
                 }
-            } else {
-                $this->_addError('Не удалось создать XML-объект из загруженного файла');
             }
-        } /*else {
-            $this->_addError('Пустой массив входных данных');
-
-        }*/
-
-        echo'<pre>',print_r($this->errors),'</pre>';
-        die('232323');
+            if (empty($this->errors))
+                $this->_renameXml();
+        } else {
+            $this->_addError('Не удалось создать XML-объект из загруженного файла');
+        }
     }
 
 
@@ -114,21 +123,14 @@ class CMailImport {
 
     protected function _addEventMessage(array $em_data) {
         if (!empty($em_data)) {
-            /*if (false === $this->obj_event_message)
+            if (false === $this->obj_event_message)
                 $this->obj_event_message = new CEventMessage;
 
             $res = $this->obj_event_message->Add($em_data);
-            if ($res) {
-
-            } else {
+            if (!$res)
                 $this->_addError('Ошибка добавления почтового шаблона: '
                     . $this->obj_event_message->LAST_ERROR);
-            }*/
-
-            echo'<pre>',print_r($em_data),'</pre>';
-
         }
-
     }
 
 
@@ -136,6 +138,14 @@ class CMailImport {
         $err_str = trim($err_str);
         if ('' != $err_str)
             $this->errors[] = $err_str;
+    }
+
+
+    protected function _renameXml() {
+        if (!rename($this->_import_filename, $this->_import_filename_parsed))
+            $this->_addError('Не удалось переименовать файл '
+                . $this->_import_filename . ' в '
+                . $this->_import_filename_parsed . '.');
     }
 
 }
