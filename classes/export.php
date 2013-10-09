@@ -102,7 +102,7 @@ class CMailExport {
                 );
                 foreach ($this->_additional_message_fields as $field)
                     if ('' != $row[$field])
-                       $message_data[$field] = $row[$field];
+                       $message_data[strtotlowe($field)] = $row[$field];
 
                 $result[] = $message_data;
             }
