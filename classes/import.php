@@ -70,11 +70,11 @@ class CMailImport {
                     foreach ($event->{CMailTags::MESSAGE} as $msg) {
                         $attributes = $msg->attributes();
                         $active = strval($attributes->{CMailTags::ACTIVE});
-                        /*$ = strval($msg->{CMailTag::});
-                        $ = strval($msg->{CMailTag::});*/   // TODO!
+                        $lid = strval($msg->{CMailTag::LID});
+                        //$ = strval($msg->{CMailTag::});
                         $msg_array = array(
                             'ACTIVE' => $active,
-                            //'LID' => $lid,    // TODO
+                            'LID' => $lid,
                             'EVENT_NAME' => $event_name,
                             'EMAIL_FROM' => strval($msg->{CMailTags::EMAIL_FROM}),
                             'EMAIL_TO ' => strval($msg->{CMailTags::EMAIL_TO}),
