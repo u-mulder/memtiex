@@ -72,13 +72,13 @@ class CMailImport {
                     foreach ($event->{CMailTags::MESSAGE} as $msg) {
                         $attributes = $msg->attributes();
                         $active = strval($attributes->{CMailTags::ACTIVE});
-                        $lid = strval($msg->{CMailTags::LID});
+                        $lid = strval($attributes->{CMailTags::LID});
                         $msg_array = array(
                             'ACTIVE' => $active,
                             'LID' => $lid,
                             'EVENT_NAME' => $event_name,
                             'EMAIL_FROM' => strval($msg->{CMailTags::EMAIL_FROM}),
-                            'EMAIL_TO ' => strval($msg->{CMailTags::EMAIL_TO}),
+                            'EMAIL_TO' => strval($msg->{CMailTags::EMAIL_TO}),
                             'SUBJECT' => CMailHelper::convertCharset(
                                 strval($msg->{CMailTags::SUBJECT}), 'utf-8', SITE_CHARSET),
                             'MESSAGE' => CMailHelper::convertCharset(
@@ -125,7 +125,6 @@ class CMailImport {
 
 
     protected function _addEventMessage(array $em_data) {
-    
         if (!empty($em_data)) {
             if (false === $this->obj_event_message)
                 $this->obj_event_message = new CEventMessage;
