@@ -2,11 +2,10 @@
 if (!defined('MAIL_IMPEXP_ON') || MAIL_IMPEXP_ON !== true)
     die();?>
 <form action="" method="POST" enctype="multipart/form-data" />
-    <h3>Импорт почтовых событий и шаблонов из файлов</h3>
+    <h3><?=GetMessage('MMTX_I_CAPTION')?></h3>
     <div>
-        Файл с данными
+        <?=GetMessage('MMTX_I_FILE_CAPTION')?>
         <input type="file" name="iev" />
-        <!-- a href="#" id="">Добавить файл</a -->
-        <input type="submit" name="import" value="Импортировать" />
+        <input type="submit" name="import" value="<?=GetMessage('MMTX_I_BTN_CAPTION')?>" />
     </div>
 </form>

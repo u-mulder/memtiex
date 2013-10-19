@@ -13,7 +13,6 @@ class CMailHelper {
     public static function getEventTypes() {
         $result = array();
 
-        // порядок сортировки идет вторым параметром
         $db_items = CEventType::GetList(
             array(),
             array('EVENT_NAME' => 'ASC')

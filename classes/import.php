@@ -33,10 +33,10 @@ class CMailImport {
                 $path . $this->_import_filename)) {
                 $this->_parse();
             } else {
-                $this->_addError('Ошибка перемещения файла.');
+                $this->_addError(GetMessage('MMTX_I_ERR_FILE_MOVE'));
             }
         } else {
-            $this->_addError('Ошибка загрузки файла.');
+            $this->_addError(GetMessage('MMTX_I_ERR_FILE_UPLOAD'));
         }
     }
 
@@ -58,8 +58,10 @@ class CMailImport {
                     $res = $this->_addEventType(array(
                         'EVENT_NAME' => $event_name,
                         'LID' => $lid,
-                        'NAME' => strval($event_item->{CMailTags::EVENT_NAME}),
-                        'DESCRIPTION' => strval($event_item->{CMailTags::EVENT_DESCR}),
+                        'NAME' => CMailHelper::convertCharset(
+                            strval($event_item->{CMailTags::EVENT_NAME}), 'utf-8', SITE_CHARSET),
+                        'DESCRIPTION' => CMailHelper::convertCharset(
+                            strval($event_item->{CMailTags::EVENT_DESCR}), 'utf-8', SITE_CHARSET),
                         'SORT' => $sort,
                     ));
                     if (!$res)
@@ -70,16 +72,17 @@ class CMailImport {
                     foreach ($event->{CMailTags::MESSAGE} as $msg) {
                         $attributes = $msg->attributes();
                         $active = strval($attributes->{CMailTags::ACTIVE});
-                        $lid = strval($msg->{CMailTag::LID});
-                        //$ = strval($msg->{CMailTag::});
+                        $lid = strval($msg->{CMailTags::LID});
                         $msg_array = array(
                             'ACTIVE' => $active,
                             'LID' => $lid,
                             'EVENT_NAME' => $event_name,
                             'EMAIL_FROM' => strval($msg->{CMailTags::EMAIL_FROM}),
                             'EMAIL_TO ' => strval($msg->{CMailTags::EMAIL_TO}),
-                            'SUBJECT' => strval($msg->{CMailTags::SUBJECT}),
-                            'MESSAGE' => strval($msg->{CMailTags::MESSAGE_TEXT}),
+                            'SUBJECT' => CMailHelper::convertCharset(
+                                strval($msg->{CMailTags::SUBJECT}), 'utf-8', SITE_CHARSET),
+                            'MESSAGE' => CMailHelper::convertCharset(
+                                strval($msg->{CMailTags::MESSAGE_TEXT}), 'utf-8', SITE_CHARSET),
                             'BODY_TYPE' => strval($msg->{CMailTags::BODY_TYPE}),
                         );
                         foreach ($this->_additional_message_fields as $field) {
@@ -94,7 +97,7 @@ class CMailImport {
             if (empty($this->errors))
                 $this->_renameXml();
         } else {
-            $this->_addError('Не удалось создать XML-объект из загруженного файла');
+            $this->_addError(GetMessage('MMTX_I_ERR_XML_CREATE'));
         }
     }
 
@@ -113,7 +116,7 @@ class CMailImport {
 
             $result = $this->obj_event_type->Add($et_data);
             if (!$result)
-                $this->_addError('Ошибка добавления почтового события: '
+                $this->_addError(GetMessage('MMTX_I_ERR_ADD_EVENT')
                     . $this->obj_event_type->LAST_ERROR);
         }
 
@@ -122,13 +125,14 @@ class CMailImport {
 
 
     protected function _addEventMessage(array $em_data) {
+    
         if (!empty($em_data)) {
             if (false === $this->obj_event_message)
                 $this->obj_event_message = new CEventMessage;
 
             $res = $this->obj_event_message->Add($em_data);
             if (!$res)
-                $this->_addError('Ошибка добавления почтового шаблона: '
+                $this->_addError(GetMessage('MMTX_I_ERR_ADD_MESSAGE')
                     . $this->obj_event_message->LAST_ERROR);
         }
     }
@@ -143,9 +147,13 @@ class CMailImport {
 
     protected function _renameXml() {
         if (!rename($this->_import_filename, $this->_import_filename_parsed))
-            $this->_addError('Не удалось переименовать файл '
-                . $this->_import_filename . ' в '
-                . $this->_import_filename_parsed . '.');
+            $this->_addError(GetMessage(
+                'MMTX_I_ERR_FILE_RENAME',
+                array(
+                    '#FROM_NAME#' => $this->_import_filename,
+                    '#TO_NAME#' => $this->_import_filename_parsed,
+                )
+            ));
     }
 
 }

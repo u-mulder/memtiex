@@ -4,6 +4,7 @@ if (!defined('MAIL_IMPEXP_ON') || MAIL_IMPEXP_ON !== true)
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Перенос почтовых шаблонов 1C-Bitrix</title>
+        <title><?=GetMessage('MMTX_PAGE_TITLE')?></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=<?=SITE_CHARSET?>">
     </head>
     <body>

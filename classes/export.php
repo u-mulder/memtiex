@@ -34,7 +34,7 @@ class CMailExport {
             }
             $this->_export();
         } else {
-            $this->_addError('Не указаны коды почтовых событий.');
+            $this->_addError(GetMessage('MMTX_E_ERR_NO_EVENTS'));
         }
     }
 
@@ -124,8 +124,10 @@ class CMailExport {
                         $lid = $event->addChild(CMailTags::EVENT_ITEM);
                         $lid->addAttribute(CMailTags::SORT, $lid_event['sort']);
                         $lid->addAttribute(CMailTags::EVENT_LID, $lid_event['lid']);
-                        $lid->addChild(CMailTags::EVENT_NAME, $lid_event['name']);
-                        $lid->addChild(CMailTags::EVENT_DESCR, $lid_event['description']);
+                        $lid->addChild(CMailTags::EVENT_NAME, 
+                            CMailHelper::convertCharset($lid_event['name'], SITE_CHARSET, 'utf-8'));
+                        $lid->addChild(CMailTags::EVENT_DESCR, 
+                            CMailHelper::convertCharset($lid_event['description'], SITE_CHARSET, 'utf-8'));
                     }
                     if (!empty($data['messages'])) {
                         foreach ($data['messages'] as $message) {
@@ -135,8 +137,10 @@ class CMailExport {
                             $msg->addAttribute(CMailTags::SITE_ID, $message['SITE_ID']);
                             $msg->addChild(CMailTags::EMAIL_FROM, $message['EMAIL_FROM']);
                             $msg->addChild(CMailTags::EMAIL_TO, $message['EMAIL_TO']);
-                            $msg->addChild(CMailTags::SUBJECT, $message['SUBJECT']);
-                            $msg->addChild(CMailTags::MESSAGE_TEXT, $message['MESSAGE']);
+                            $msg->addChild(CMailTags::SUBJECT, 
+                                CMailHelper::convertCharset($message['SUBJECT'], SITE_CHARSET, 'utf-8'));
+                            $msg->addChild(CMailTags::MESSAGE_TEXT, 
+                                CMailHelper::convertCharset($message['MESSAGE'], SITE_CHARSET, 'utf-8'));
                             $msg->addChild(CMailTags::BODY_TYPE, $message['BODY_TYPE']);
                             foreach ($this->_additional_message_fields as $field)
                                 if (array_key_exists($field, $message))
@@ -146,12 +150,12 @@ class CMailExport {
                 }
                 $res = $xml->asXML($this->_export_filename);
                 if (!$res)
-                    $this->_addError('Ошибка записи в файл XML');
+                    $this->_addError(GetMessage('MMTX_E_ERR_XML_WRITE'));
             } else {
-                $this->_addError('Ошибка создания XML-объекта');
+                $this->_addError(GetMessage('MMTX_E_ERR_XML_CREATE'));
             }
         } else {
-            $this->_addError('Нет данных для импорта.');
+            $this->_addError(GetMessage('MMTX_E_ERR_NO_DATA'));
         }
     }
 

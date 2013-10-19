@@ -2,10 +2,10 @@
 if (!defined('MAIL_IMPEXP_ON') || MAIL_IMPEXP_ON !== true)
     die();
 if (empty($errors)) {?>
-<p>Экспорт успешно завершен. В каталоге со скриптом создан файл <b><?=$filename?></b></p>
+<p><?=GetMessage('MMTX_E_RES_SUCC')?><b><?=$filename?></b></p>
 <?php
 } else {?>
-<p>При экспорте событий и шаблонов произошли следующие ошибки:</p>
+<p><?=GetMessage('MMTX_E_RES_FAIL')?></p>
 <ul><li><?=implode('</li><li>', $errors)?></li></ul>
 <?php
 }?>
