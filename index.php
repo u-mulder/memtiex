@@ -2,15 +2,15 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php');
 
 $charset = strtolower(str_replace('-', '', SITE_CHARSET));
-$lang_file_path = 'lang/' . LANGUAGE_ID . '/lang_' 
+$lang_file_path = 'lang/' . LANGUAGE_ID . '/lang_'
     . $charset . '.php';
-    
+
 if (file_exists($lang_file_path))
     include($lang_file_path);
 
-/*global $USER; // TODO
+global $USER;
 if (!$USER->IsAdmin())
-    LocalRedirect('/');*/
+    LocalRedirect('/');
 
 define('MAIL_IMPEXP_ON', true);
 spl_autoload_register('ie_classes_loader');
